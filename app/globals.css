@@ -441,8 +441,14 @@ button:disabled {
   color: var(--c-editor-fg);
   caret-color: var(--c-text-accent);
   tab-size: 4;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   overflow: auto;
+}
+
+.zed-editor__body[data-wrap="false"] {
+  white-space: pre;
+  overflow-wrap: normal;
 }
 
 .zed-editor__body::placeholder {
@@ -858,8 +864,6 @@ button:disabled {
 
   .zed-editor__body {
     padding: 16px 16px 48px;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
   }
 
   .zed-note-item__delete {
