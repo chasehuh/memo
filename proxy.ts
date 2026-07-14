@@ -1,33 +1,32 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const authed = verifySessionToken(token);
+const isPublicRoute = createRouteMatcher(["/login(.*)"]);
+const isApiRoute = createRouteMatcher(["/api(.*)"]);
 
-  if (pathname === "/login") {
-    if (authed) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-    return NextResponse.next();
+export default clerkMiddleware(async (auth, request) => {
+  if (isPublicRoute(request)) {
+    return;
   }
 
-  if (pathname.startsWith("/api/auth/login")) {
-    return NextResponse.next();
+  const { userId } = await auth();
+  if (userId) {
+    return;
   }
 
-  if (!authed) {
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+  if (isApiRoute(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  return NextResponse.next();
-}
+  await auth.protect({
+    unauthenticatedUrl: new URL("/login", request.url).toString(),
+  });
+});
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+    "/__clerk/(.*)",
+  ],
 };

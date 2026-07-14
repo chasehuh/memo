@@ -526,6 +526,35 @@ button:disabled {
   font-size: 12px;
 }
 
+.zed-dialog--clerk {
+  max-width: 420px;
+}
+
+.memo-clerk-root {
+  width: 100%;
+}
+
+.memo-clerk-card-box,
+.memo-clerk-card {
+  box-shadow: none !important;
+  background: transparent !important;
+  border: none !important;
+  width: 100% !important;
+}
+
+.memo-clerk-hidden {
+  display: none !important;
+}
+
+.memo-clerk-oauth {
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+.memo-clerk-footer {
+  background: transparent !important;
+}
+
 .zed-btn {
   height: 28px;
   padding: 0 12px;

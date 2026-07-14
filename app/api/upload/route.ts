@@ -4,10 +4,14 @@ import {
   mediaUploadConfigured,
   uploadImageBytes,
 } from "@/lib/media";
+import { requireUserId } from "@/lib/require-user";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const authResult = await requireUserId();
+  if ("error" in authResult) return authResult.error;
+
   if (!mediaUploadConfigured()) {
     return NextResponse.json(
       { error: "Media upload is not configured" },
@@ -41,7 +45,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const uploaded = await uploadImageBytes(bytes, type);
+    const uploaded = await uploadImageBytes(bytes, type, {
+      keyPrefix: `memo/${authResult.userId}`,
+    });
     return NextResponse.json(
       { url: uploaded.url, key: uploaded.key },
       { status: 201 },

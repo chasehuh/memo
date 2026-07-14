@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeBoot } from "@/components/theme-boot";
 import { faviconBootScript } from "@/lib/themes";
 import "./globals.css";
@@ -37,8 +38,10 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: faviconBootScript() }} />
       </head>
       <body className="h-full">
-        <ThemeBoot />
-        {children}
+        <ClerkProvider>
+          <ThemeBoot />
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   );

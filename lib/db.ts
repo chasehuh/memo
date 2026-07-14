@@ -36,15 +36,37 @@ export async function ensureSchema() {
       await pool.query(`
         CREATE TABLE IF NOT EXISTS notes (
           id UUID PRIMARY KEY,
+          user_id TEXT NOT NULL,
           title TEXT NOT NULL DEFAULT '',
           body TEXT NOT NULL DEFAULT '',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
       `);
+      // Existing deployments created notes without user_id — add nullable first.
       await pool.query(`
-        CREATE INDEX IF NOT EXISTS notes_updated_at_idx
-        ON notes (updated_at DESC);
+        ALTER TABLE notes ADD COLUMN IF NOT EXISTS user_id TEXT;
+      `);
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS notes_user_updated_at_idx
+        ON notes (user_id, updated_at DESC);
+      `);
+      // Only enforce NOT NULL once legacy rows are backfilled (see README).
+      await pool.query(`
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name = 'notes'
+              AND column_name = 'user_id'
+              AND is_nullable = 'YES'
+          ) AND NOT EXISTS (
+            SELECT 1 FROM notes WHERE user_id IS NULL
+          ) THEN
+            ALTER TABLE notes ALTER COLUMN user_id SET NOT NULL;
+          END IF;
+        END $$;
       `);
     })();
   }

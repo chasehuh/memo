@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useClerk } from "@clerk/nextjs";
 import type { Note } from "@/lib/types";
 import { substituteAsciiArrows } from "@/lib/arrows";
 import {
@@ -108,7 +109,14 @@ function formatUpdatedAt(value: string) {
   }).format(date);
 }
 
-export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
+export function MemoApp({
+  initialNotes,
+  userId,
+}: {
+  initialNotes: Note[];
+  userId: string;
+}) {
+  const { signOut } = useClerk();
   const [notes, setNotes] = useState(() => sortNotesByRecent(initialNotes));
   const [activeId, setActiveId] = useState<string | null>(
     initialNotes[0]?.id ?? null,
@@ -404,7 +412,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
           return next;
         });
       }
-    });
+    }, userId);
     syncPost.current = channel.post;
 
     const poll = window.setInterval(() => {
@@ -428,7 +436,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
       window.removeEventListener("focus", onVisible);
       if (draftTimer.current) clearTimeout(draftTimer.current);
     };
-  }, [applyRemoteDraft, applyRemoteNote, pullFromServer]);
+  }, [applyRemoteDraft, applyRemoteNote, pullFromServer, userId]);
 
   const createNote = useCallback(async () => {
     const response = await fetch("/api/notes", { method: "POST" });
@@ -469,8 +477,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
+    await signOut({ redirectUrl: "/login" });
   }
 
   useEffect(() => {
