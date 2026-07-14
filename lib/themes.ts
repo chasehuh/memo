@@ -433,18 +433,16 @@ export function getTheme(id: ThemeId): ThemeDefinition {
   return THEMES.find((theme) => theme.id === id) ?? THEMES[0];
 }
 
-export function faviconHref(tokens: Pick<
-  ThemeTokens,
-  "surface" | "elevated" | "border" | "textAccent"
->) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${tokens.surface}"/><rect x="7" y="6.5" width="18" height="19" rx="3.5" fill="${tokens.elevated}" stroke="${tokens.border}" stroke-width="1.2"/><path d="M11 12.5h10M11 16.5h10M11 20.5h6.5" stroke="${tokens.textAccent}" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+/** Solid square favicon (chasehuh.com style), tinted with the theme text color. */
+export function faviconHref(color: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="${color}"/></svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
 function updateFavicon(tokens: ThemeTokens) {
   if (typeof document === "undefined") return;
 
-  const href = faviconHref(tokens);
+  const href = faviconHref(tokens.text);
   let link = document.querySelector<HTMLLinkElement>(
     'link[rel="icon"][data-memo-favicon]',
   );
@@ -461,34 +459,16 @@ function updateFavicon(tokens: ThemeTokens) {
   link.href = href;
 }
 
-type FaviconPalette = Pick<
-  ThemeTokens,
-  "surface" | "elevated" | "border" | "textAccent"
->;
-
-/** Compact palette map for the blocking favicon boot script. */
+/** Compact color map for the blocking favicon boot script. */
 export function faviconBootScript() {
-  const palettes = Object.fromEntries(
+  const colors = Object.fromEntries(
     THEMES.map((theme) => [
       theme.id,
-      {
-        dark: {
-          surface: theme.dark.surface,
-          elevated: theme.dark.elevated,
-          border: theme.dark.border,
-          textAccent: theme.dark.textAccent,
-        } satisfies FaviconPalette,
-        light: {
-          surface: theme.light.surface,
-          elevated: theme.light.elevated,
-          border: theme.light.border,
-          textAccent: theme.light.textAccent,
-        } satisfies FaviconPalette,
-      },
+      { dark: theme.dark.text, light: theme.light.text },
     ]),
   );
 
-  return `(()=>{try{var P=${JSON.stringify(palettes)};var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)})||${JSON.stringify(DEFAULT_THEME_ID)};var a=localStorage.getItem(${JSON.stringify(APPEARANCE_STORAGE_KEY)})||${JSON.stringify(DEFAULT_APPEARANCE)};var p=(P[t]||P[${JSON.stringify(DEFAULT_THEME_ID)}])[a==="light"?"light":"dark"];var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="'+p.surface+'"/><rect x="7" y="6.5" width="18" height="19" rx="3.5" fill="'+p.elevated+'" stroke="'+p.border+'" stroke-width="1.2"/><path d="M11 12.5h10M11 16.5h10M11 20.5h6.5" stroke="'+p.textAccent+'" stroke-width="1.8" stroke-linecap="round"/></svg>';var h='data:image/svg+xml,'+encodeURIComponent(s);var l=document.querySelector('link[rel="icon"][data-memo-favicon]');if(!l){document.querySelectorAll('link[rel="icon"]:not([data-memo-favicon])').forEach(function(n){n.remove()});l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';l.setAttribute('data-memo-favicon','true');document.head.appendChild(l)}l.href=h}catch(e){}})();`;
+  return `(()=>{try{var C=${JSON.stringify(colors)};var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)})||${JSON.stringify(DEFAULT_THEME_ID)};var a=localStorage.getItem(${JSON.stringify(APPEARANCE_STORAGE_KEY)})||${JSON.stringify(DEFAULT_APPEARANCE)};var c=(C[t]||C[${JSON.stringify(DEFAULT_THEME_ID)}])[a==="light"?"light":"dark"];var h=${JSON.stringify("data:image/svg+xml,")}+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="'+c+'"/></svg>');var l=document.querySelector('link[rel="icon"][data-memo-favicon]');if(!l){document.querySelectorAll('link[rel="icon"]:not([data-memo-favicon])').forEach(function(n){n.remove()});l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';l.setAttribute('data-memo-favicon','true');document.head.appendChild(l)}l.href=h}catch(e){}})();`;
 }
 
 export function applyTheme(id: ThemeId, appearance: Appearance = "dark") {
