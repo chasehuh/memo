@@ -25,7 +25,12 @@ import {
   type ThemeId,
 } from "@/lib/themes";
 import { CodeMirrorEditor } from "./codemirror-editor";
-import { MenuIcon, PlusIcon, SettingsIcon } from "./icons";
+import {
+  PlusIcon,
+  SettingsIcon,
+  SidebarLeftClosedIcon,
+  SidebarLeftOpenIcon,
+} from "./icons";
 import { SettingsPanel } from "./settings-panel";
 
 type SaveState = "saved" | "saving" | "dirty" | "error";
@@ -490,6 +495,27 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
 
   return (
     <div className="zed-shell">
+      {/* Zed-like chrome: full-width titlebar; left dock toggle (⌘B) */}
+      <header className="zed-titlebar">
+        <button
+          type="button"
+          className="zed-icon-btn"
+          data-active={sidebarOpen ? "true" : "false"}
+          onClick={() => setSidebarOpen((value) => !value)}
+          title={sidebarOpen ? "Hide notes (⌘B)" : "Show notes (⌘B)"}
+          aria-label={sidebarOpen ? "Hide notes" : "Show notes"}
+          aria-pressed={sidebarOpen}
+        >
+          {sidebarOpen ? (
+            <SidebarLeftOpenIcon size={14} />
+          ) : (
+            <SidebarLeftClosedIcon size={14} />
+          )}
+        </button>
+        <span className="zed-titlebar__brand">memo</span>
+        <div className="zed-titlebar__spacer" />
+      </header>
+
       <div className="zed-workspace">
         <aside
           className="zed-panel"
@@ -507,15 +533,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
                 title="New note (⌘N)"
                 aria-label="New note"
               >
-                <PlusIcon size={13} />
-              </button>
-              <button
-                type="button"
-                className="zed-text-btn"
-                onClick={() => setSidebarOpen(false)}
-                title="Hide notes (⌘B)"
-              >
-                Hide
+                <PlusIcon size={14} />
               </button>
             </div>
           </div>
@@ -611,18 +629,6 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
           )}
         </section>
       </div>
-
-      {!sidebarOpen ? (
-        <button
-          type="button"
-          className="zed-notes-fab"
-          onClick={() => setSidebarOpen(true)}
-          aria-label="Open notes"
-          title="Notes"
-        >
-          <MenuIcon size={16} />
-        </button>
-      ) : null}
 
       <SettingsPanel
         open={settingsOpen}
