@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import type { MarkdownImage } from "@/lib/media";
 
 const DEFAULT_PREVIEW_WIDTH = 480;
@@ -19,7 +19,7 @@ export function ResizableImagePreview({
   const width = draftWidth ?? image.width ?? DEFAULT_PREVIEW_WIDTH;
 
   const onPointerDown = useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
+    (event: ReactPointerEvent<HTMLButtonElement>) => {
       event.preventDefault();
       event.stopPropagation();
       const handle = event.currentTarget;
