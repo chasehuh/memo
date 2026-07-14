@@ -398,24 +398,45 @@ button:disabled {
 }
 
 .zed-buffer {
+  /* Scrollport: Zed default scroll_beyond_last_line = one_page */
+  container-type: size;
   flex: 1;
   min-height: 0;
   display: flex;
-  align-items: stretch;
-  overflow: hidden;
+  align-items: flex-start;
+  overflow: auto;
+  background: var(--c-editor);
 }
 
 .zed-gutter {
   flex-shrink: 0;
   width: var(--c-gutter-w);
-  overflow: hidden;
-  padding: 20px 0 64px;
+  overflow: visible;
+  padding: 20px 0;
+  /* Match .zed-editor__beyond so line numbers stay aligned while scrolling. */
+  padding-bottom: max(0px, calc(100cqh - 1lh));
   background: var(--c-editor);
   font-family: var(--c-buffer-font);
   font-size: var(--c-buffer-size);
   line-height: var(--c-buffer-line-height);
   text-align: right;
   user-select: none;
+}
+
+.zed-editor-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.zed-editor__beyond {
+  flex: 0 0 auto;
+  width: 100%;
+  font-size: var(--c-buffer-size);
+  line-height: var(--c-buffer-line-height);
+  height: max(0px, calc(100cqh - 1lh));
+  cursor: text;
 }
 
 .zed-gutter__line {
@@ -436,15 +457,19 @@ button:disabled {
 }
 
 .zed-editor__body {
-  flex: 1;
+  display: block;
+  box-sizing: content-box;
+  flex: 0 0 auto;
   min-width: 0;
-  min-height: 0;
   width: 100%;
+  /* Height is set in JS from scrollHeight so the buffer (not the textarea) scrolls. */
+  height: auto;
+  min-height: calc(1lh);
   border: 0;
   outline: none;
   resize: none;
   background: transparent;
-  padding: 20px 28px 64px 14px;
+  padding: 20px 28px 0 14px;
   font-family: var(--c-buffer-font);
   font-size: var(--c-buffer-size);
   font-weight: 400;
@@ -456,7 +481,8 @@ button:disabled {
   font-feature-settings: "calt" 1;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  overflow: auto;
+  overflow: hidden;
+  field-sizing: content;
 }
 
 .zed-editor__body[data-wrap="false"] {

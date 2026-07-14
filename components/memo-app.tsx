@@ -133,6 +133,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
   const skipNextSave = useRef(false);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
+  const bufferRef = useRef<HTMLDivElement>(null);
   const pendingCaretRef = useRef<number | null>(null);
   const tabId = useRef(createTabId());
   const syncPost = useRef<(message: SyncMessage) => void>(() => {});
@@ -286,6 +287,13 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
       setGutterLineHeightPx(lineHeightPx);
     }
 
+    // Fallback when field-sizing isn't supported: grow textarea with content
+    // so .zed-buffer (not the textarea) remains the scrollport.
+    if (!CSS.supports("field-sizing", "content")) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+
     if (!wrap) {
       setGutterRows(unitRowCounts(lineCount));
       return;
@@ -299,12 +307,12 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
   }, [refreshGutterMetrics]);
 
   useEffect(() => {
-    const textarea = bodyRef.current;
-    if (!textarea) return;
+    const buffer = bufferRef.current;
+    if (!buffer) return;
     const observer = new ResizeObserver(() => {
       refreshGutterMetrics();
     });
-    observer.observe(textarea);
+    observer.observe(buffer);
     return () => observer.disconnect();
   }, [refreshGutterMetrics, activeId]);
 
@@ -546,11 +554,6 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [createNote]);
 
-  function syncGutterScroll() {
-    if (!bodyRef.current || !gutterRef.current) return;
-    gutterRef.current.scrollTop = bodyRef.current.scrollTop;
-  }
-
   return (
     <div className="zed-shell">
       <div className="zed-workspace">
@@ -640,7 +643,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
         <section className="zed-center">
           {activeId ? (
             <div className="zed-editor">
-              <div className="zed-buffer">
+              <div className="zed-buffer" ref={bufferRef}>
                 <div
                   className="zed-gutter"
                   ref={gutterRef}
@@ -666,55 +669,70 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
                     );
                   })}
                 </div>
-                <textarea
-                  ref={bodyRef}
-                  className="zed-editor__body"
-                  data-wrap={wrap ? "true" : "false"}
-                  value={body}
-                  onChange={(event) => {
-                    const next = substituteAsciiArrows(
-                      event.target.value,
-                      event.target.selectionStart,
-                    );
-                    if (next.text !== event.target.value) {
-                      pendingCaretRef.current = next.caret;
-                    }
-                    setBody(next.text);
-                    setCaret(next.caret);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key !== "Tab") return;
-                    if (event.metaKey || event.ctrlKey || event.altKey) return;
-                    // Zed-like hard_tabs: false — Tab inserts spaces; avoid focus steal.
-                    event.preventDefault();
-                    if (event.shiftKey) return;
+                <div className="zed-editor-column">
+                  <textarea
+                    ref={bodyRef}
+                    className="zed-editor__body"
+                    data-wrap={wrap ? "true" : "false"}
+                    value={body}
+                    rows={1}
+                    onChange={(event) => {
+                      const next = substituteAsciiArrows(
+                        event.target.value,
+                        event.target.selectionStart,
+                      );
+                      if (next.text !== event.target.value) {
+                        pendingCaretRef.current = next.caret;
+                      }
+                      setBody(next.text);
+                      setCaret(next.caret);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Tab") return;
+                      if (event.metaKey || event.ctrlKey || event.altKey) return;
+                      // Zed-like hard_tabs: false — Tab inserts spaces; avoid focus steal.
+                      event.preventDefault();
+                      if (event.shiftKey) return;
 
-                    const textarea = event.currentTarget;
-                    const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
-                    const spaces = "    ";
-                    const next = substituteAsciiArrows(
-                      body.slice(0, start) + spaces + body.slice(end),
-                      start + spaces.length,
-                    );
-                    pendingCaretRef.current = next.caret;
-                    setBody(next.text);
-                    setCaret(next.caret);
-                  }}
-                  onScroll={syncGutterScroll}
-                  onSelect={(event) => {
-                    setCaret(event.currentTarget.selectionStart);
-                  }}
-                  onKeyUp={(event) => {
-                    setCaret(event.currentTarget.selectionStart);
-                  }}
-                  onClick={(event) => {
-                    setCaret(event.currentTarget.selectionStart);
-                  }}
-                  placeholder="Start typing…"
-                  spellCheck
-                  autoFocus
-                />
+                      const textarea = event.currentTarget;
+                      const start = textarea.selectionStart;
+                      const end = textarea.selectionEnd;
+                      const spaces = "    ";
+                      const next = substituteAsciiArrows(
+                        body.slice(0, start) + spaces + body.slice(end),
+                        start + spaces.length,
+                      );
+                      pendingCaretRef.current = next.caret;
+                      setBody(next.text);
+                      setCaret(next.caret);
+                    }}
+                    onSelect={(event) => {
+                      setCaret(event.currentTarget.selectionStart);
+                    }}
+                    onKeyUp={(event) => {
+                      setCaret(event.currentTarget.selectionStart);
+                    }}
+                    onClick={(event) => {
+                      setCaret(event.currentTarget.selectionStart);
+                    }}
+                    placeholder="Start typing…"
+                    spellCheck
+                    autoFocus
+                  />
+                  <div
+                    className="zed-editor__beyond"
+                    aria-hidden
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      const textarea = bodyRef.current;
+                      if (!textarea) return;
+                      textarea.focus();
+                      const end = textarea.value.length;
+                      textarea.setSelectionRange(end, end);
+                      setCaret(end);
+                    }}
+                  />
+                </div>
               </div>
             </div>
           ) : (
