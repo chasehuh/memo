@@ -30,17 +30,21 @@ export function SettingsPanel({
   open,
   themeId,
   appearance,
+  wrap,
   onClose,
   onThemeChange,
   onAppearanceChange,
+  onWrapChange,
   onLock,
 }: {
   open: boolean;
   themeId: ThemeId;
   appearance: Appearance;
+  wrap: boolean;
   onClose: () => void;
   onThemeChange: (id: ThemeId) => void;
   onAppearanceChange: (appearance: Appearance) => void;
+  onWrapChange: (wrap: boolean) => void;
   onLock: () => void;
 }) {
   useEffect(() => {
@@ -93,6 +97,28 @@ export function SettingsPanel({
                 onClick={() => onAppearanceChange("dark")}
               >
                 Dark
+              </button>
+            </div>
+          </section>
+
+          <section className="memo-settings__section">
+            <h3 className="memo-settings__label">Editor</h3>
+            <div className="memo-settings__segment" role="group">
+              <button
+                type="button"
+                className="memo-settings__segment-btn"
+                data-active={wrap ? "true" : "false"}
+                onClick={() => onWrapChange(true)}
+              >
+                Wrap
+              </button>
+              <button
+                type="button"
+                className="memo-settings__segment-btn"
+                data-active={!wrap ? "true" : "false"}
+                onClick={() => onWrapChange(false)}
+              >
+                No wrap
               </button>
             </div>
           </section>

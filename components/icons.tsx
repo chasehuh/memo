@@ -23,6 +23,26 @@ export function PlusIcon({ size = 14, className }: IconProps) {
   );
 }
 
+export function MenuIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M2.5 4h11M2.5 8h11M2.5 12h11"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /** Heroicons outline `cog-6-tooth` (MIT) — https://heroicons.com */
 export function SettingsIcon({ size = 16, className }: IconProps) {
   return (

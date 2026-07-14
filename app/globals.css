@@ -90,6 +90,7 @@
 html,
 body {
   height: 100%;
+  height: 100dvh;
 }
 
 body {
@@ -101,6 +102,7 @@ body {
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button,
@@ -148,10 +150,42 @@ button:disabled {
   display: flex;
   flex-direction: column;
   height: 100%;
+  height: 100dvh;
   overflow: hidden;
   background: var(--c-editor);
   color: var(--c-text);
   font-family: var(--c-ui-font);
+  padding:
+    env(safe-area-inset-top, 0)
+    env(safe-area-inset-right, 0)
+    env(safe-area-inset-bottom, 0)
+    env(safe-area-inset-left, 0);
+}
+
+.zed-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.zed-notes-fab {
+  display: none;
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--c-border);
+  background: color-mix(in srgb, var(--c-surface) 92%, transparent);
+  color: var(--c-text-muted);
+  backdrop-filter: blur(8px);
 }
 
 .zed-titlebar {
@@ -413,8 +447,14 @@ button:disabled {
   color: var(--c-editor-fg);
   caret-color: var(--c-text-accent);
   tab-size: 4;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   overflow: auto;
+}
+
+.zed-editor__body[data-wrap="false"] {
+  white-space: pre;
+  overflow-wrap: normal;
 }
 
 .zed-editor__body::placeholder {
@@ -448,10 +488,15 @@ button:disabled {
 /* Login — elevated surface dialog on editor canvas */
 .zed-login {
   min-height: 100%;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding:
+    max(24px, env(safe-area-inset-top, 0px))
+    max(24px, env(safe-area-inset-right, 0px))
+    max(24px, env(safe-area-inset-bottom, 0px))
+    max(24px, env(safe-area-inset-left, 0px));
   background: var(--c-editor);
 }
 
@@ -741,4 +786,30 @@ button:disabled {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+@media (hover: none) {
+  .zed-note-item__delete {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .zed-notes-fab {
+    display: inline-flex;
+  }
+
+  .zed-field {
+    font-size: 16px;
+  }
+
+  .zed-empty__hint {
+    display: none;
+  }
+}
+
+@media (min-width: 481px) {
+  .zed-empty__actions .zed-btn:first-child {
+    display: none;
+  }
 }

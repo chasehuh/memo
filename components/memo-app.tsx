@@ -3,6 +3,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Note } from "@/lib/types";
 import {
+  DEFAULT_WRAP,
+  WRAP_STORAGE_KEY,
+  isWrapPreference,
+} from "@/lib/preferences";
+import {
+  createTabId,
+  openSyncChannel,
+  type SyncMessage,
+} from "@/lib/tab-sync";
+import {
   APPEARANCE_STORAGE_KEY,
   DEFAULT_APPEARANCE,
   DEFAULT_THEME_ID,
@@ -13,18 +23,21 @@ import {
   type Appearance,
   type ThemeId,
 } from "@/lib/themes";
-import {
-  createTabId,
-  openSyncChannel,
-  type SyncMessage,
-} from "@/lib/tab-sync";
-import { PlusIcon, SettingsIcon } from "./icons";
+import { MenuIcon, PlusIcon, SettingsIcon } from "./icons";
 import { SettingsPanel } from "./settings-panel";
 
 type SaveState = "saved" | "saving" | "dirty" | "error";
 
 const POLL_MS = 1500;
 const DRAFT_BROADCAST_MS = 32;
+/** Phone-width only — keep tablet/desktop browser windows on the desktop layout. */
+const NARROW_QUERY = "(max-width: 480px)";
+
+function isNarrowViewport() {
+  return (
+    typeof window !== "undefined" && window.matchMedia(NARROW_QUERY).matches
+  );
+}
 
 function previewTitle(note: Pick<Note, "title" | "body">) {
   const fromTitle = note.title.trim();
@@ -105,6 +118,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
   const [themeId, setThemeId] = useState<ThemeId>(DEFAULT_THEME_ID);
   const [appearance, setAppearance] =
     useState<Appearance>(DEFAULT_APPEARANCE);
+  const [wrap, setWrap] = useState(DEFAULT_WRAP);
   const [caret, setCaret] = useState(0);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipNextSave = useRef(false);
@@ -195,6 +209,9 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
     const savedAppearance = window.localStorage.getItem(
       APPEARANCE_STORAGE_KEY,
     );
+    const savedWrap = isWrapPreference(
+      window.localStorage.getItem(WRAP_STORAGE_KEY),
+    );
     const nextTheme =
       savedTheme && isThemeId(savedTheme) ? savedTheme : DEFAULT_THEME_ID;
     const nextAppearance =
@@ -203,6 +220,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
         : DEFAULT_APPEARANCE;
     setThemeId(nextTheme);
     setAppearance(nextAppearance);
+    setWrap(savedWrap ?? DEFAULT_WRAP);
     applyTheme(nextTheme, nextAppearance);
   }, []);
 
@@ -224,6 +242,11 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
     [themeId],
   );
 
+  const selectWrap = useCallback((next: boolean) => {
+    setWrap(next);
+    window.localStorage.setItem(WRAP_STORAGE_KEY, String(next));
+  }, []);
+
   const sortedNotes = useMemo(() => sortNotesByRecent(notes), [notes]);
 
   const activeNote = useMemo(
@@ -244,6 +267,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
     setBody(note.body);
     setSaveState("saved");
     setCaret(0);
+    if (isNarrowViewport()) setSidebarOpen(false);
     requestAnimationFrame(() => bodyRef.current?.focus());
   }, []);
 
@@ -416,7 +440,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
       note: data.note,
     });
     selectNote(data.note);
-    setSidebarOpen(true);
+    if (!isNarrowViewport()) setSidebarOpen(true);
   }, [selectNote]);
 
   async function removeNote(id: string) {
@@ -476,7 +500,12 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
   return (
     <div className="zed-shell">
       <div className="zed-workspace">
-        <aside className="zed-panel" data-open={sidebarOpen}>
+        <aside
+          className="zed-panel"
+          data-open={sidebarOpen}
+          aria-hidden={!sidebarOpen}
+          inert={!sidebarOpen ? true : undefined}
+        >
           <div className="zed-panel__header">
             <span className="zed-panel__title">Notes</span>
             <div className="zed-panel__actions">
@@ -488,6 +517,14 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
                 aria-label="New note"
               >
                 <PlusIcon size={13} />
+              </button>
+              <button
+                type="button"
+                className="zed-text-btn"
+                onClick={() => setSidebarOpen(false)}
+                title="Hide notes (⌘B)"
+              >
+                Hide
               </button>
             </div>
           </div>
@@ -567,6 +604,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
                 <textarea
                   ref={bodyRef}
                   className="zed-editor__body"
+                  data-wrap={wrap ? "true" : "false"}
                   value={body}
                   onChange={(event) => {
                     setBody(event.target.value);
@@ -592,25 +630,48 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
             <div className="zed-empty">
               <p>No open note</p>
               <p className="zed-empty__hint">⌘B notes · ⌘N new</p>
-              <button
-                type="button"
-                className="zed-link"
-                onClick={() => void createNote()}
-              >
-                Create a note
-              </button>
+              <div className="zed-empty__actions">
+                <button
+                  type="button"
+                  className="zed-btn zed-btn-primary"
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  Notes
+                </button>
+                <button
+                  type="button"
+                  className="zed-btn"
+                  onClick={() => void createNote()}
+                >
+                  New note
+                </button>
+              </div>
             </div>
           )}
         </section>
       </div>
 
+      {!sidebarOpen ? (
+        <button
+          type="button"
+          className="zed-notes-fab"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open notes"
+          title="Notes"
+        >
+          <MenuIcon size={16} />
+        </button>
+      ) : null}
+
       <SettingsPanel
         open={settingsOpen}
         themeId={themeId}
         appearance={appearance}
+        wrap={wrap}
         onClose={() => setSettingsOpen(false)}
         onThemeChange={selectTheme}
         onAppearanceChange={selectAppearance}
+        onWrapChange={selectWrap}
         onLock={() => void logout()}
       />
     </div>
