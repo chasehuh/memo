@@ -9,6 +9,7 @@ import {
   placeholder,
   highlightActiveLine,
   highlightActiveLineGutter,
+  scrollPastEnd,
 } from "@codemirror/view";
 import { EditorState, Compartment, Prec } from "@codemirror/state";
 import {
@@ -72,6 +73,8 @@ function editorExtensions(
     arrowPasteFilter(),
     imageWidgets,
     imagePasteDrop(),
+    // Zed-like one_page: content-only spacer so gutters stay CM-owned geometry
+    scrollPastEnd(),
     EditorView.updateListener.of((update) => {
       if (!update.docChanged || applyingExternal.current) return;
       onChangeRef.current(update.state.doc.toString());
@@ -89,9 +92,8 @@ function editorExtensions(
       ".cm-content": {
         caretColor: "var(--c-text-accent)",
         color: "var(--c-editor-fg)",
+        // Bottom padding comes from scrollPastEnd() (content attrs only)
         padding: "20px 28px 0 0",
-        // Zed one_page scroll-beyond-last-line
-        paddingBottom: "max(0px, calc(100% - 1lh))",
         minHeight: "100%",
         fontVariantLigatures: "contextual",
         fontFeatureSettings: '"calt" 1',
@@ -107,8 +109,9 @@ function editorExtensions(
         fontFamily: "var(--c-buffer-font)",
         fontSize: "var(--c-buffer-size)",
         lineHeight: "var(--c-buffer-line-height)",
+        // Match content top inset only; do not mirror scroll-beyond padding
+        // (% / calc resolves against a different box than .cm-content → drift)
         paddingTop: "20px",
-        paddingBottom: "max(0px, calc(100% - 1lh))",
       },
       ".cm-gutter.cm-lineNumbers": {
         minWidth: "var(--c-gutter-w)",

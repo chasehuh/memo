@@ -426,7 +426,9 @@ button:disabled {
   position: relative;
   display: block;
   max-width: calc(100% - 28px);
-  margin: 8px 28px 16px 14px;
+  /* Vertical padding stays inside CM block-widget height; horizontal inset via margin */
+  margin: 0 28px 0 14px;
+  padding: 8px 0 16px;
   line-height: 0;
 }
 
