@@ -23,7 +23,7 @@ import {
   type Appearance,
   type ThemeId,
 } from "@/lib/themes";
-import { CloseIcon, MenuIcon, PlusIcon, SettingsIcon } from "./icons";
+import { MenuIcon, PlusIcon, SettingsIcon } from "./icons";
 import { SettingsPanel } from "./settings-panel";
 
 type SaveState = "saved" | "saving" | "dirty" | "error";
@@ -496,21 +496,9 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
     gutterRef.current.scrollTop = bodyRef.current.scrollTop;
   }
 
-  const activeTitle = activeId
-    ? previewTitle({ title: deriveTitle(body), body })
-    : "memo";
-
   return (
     <div className="zed-shell">
       <div className="zed-workspace">
-        {sidebarOpen ? (
-          <button
-            type="button"
-            className="zed-panel-backdrop"
-            aria-label="Close notes"
-            onClick={() => setSidebarOpen(false)}
-          />
-        ) : null}
         <aside
           className="zed-panel"
           data-open={sidebarOpen}
@@ -531,11 +519,11 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
               </button>
               <button
                 type="button"
-                className="zed-icon-btn zed-panel__close"
+                className="zed-text-btn"
                 onClick={() => setSidebarOpen(false)}
-                aria-label="Close notes"
+                title="Hide notes (⌘B)"
               >
-                <CloseIcon size={14} />
+                Hide
               </button>
             </div>
           </div>
@@ -595,26 +583,6 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
         </aside>
 
         <section className="zed-center">
-          <header className="zed-mobile-bar">
-            <button
-              type="button"
-              className="zed-icon-btn zed-mobile-bar__btn"
-              data-active={sidebarOpen}
-              onClick={() => setSidebarOpen((value) => !value)}
-              aria-label={sidebarOpen ? "Close notes" : "Open notes"}
-            >
-              <MenuIcon size={16} />
-            </button>
-            <span className="zed-mobile-bar__title">{activeTitle}</span>
-            <button
-              type="button"
-              className="zed-icon-btn zed-mobile-bar__btn"
-              onClick={() => void createNote()}
-              aria-label="New note"
-            >
-              <PlusIcon size={15} />
-            </button>
-          </header>
           {activeId ? (
             <div className="zed-editor">
               <div className="zed-buffer">
@@ -660,9 +628,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
           ) : (
             <div className="zed-empty">
               <p>No open note</p>
-              <p className="zed-empty__hint zed-empty__hint--desktop">
-                ⌘B notes · ⌘N new
-              </p>
+              <p className="zed-empty__hint">⌘B notes · ⌘N new</p>
               <div className="zed-empty__actions">
                 <button
                   type="button"
@@ -683,6 +649,18 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
           )}
         </section>
       </div>
+
+      {!sidebarOpen ? (
+        <button
+          type="button"
+          className="zed-notes-fab"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open notes"
+        >
+          <MenuIcon size={15} />
+          Notes
+        </button>
+      ) : null}
 
       <SettingsPanel
         open={settingsOpen}
