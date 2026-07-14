@@ -27,7 +27,7 @@ Fill in `.env.local`:
 | `MEDIA_UPLOAD_URL` | (optional) Upload worker URL for pasted/dropped images |
 | `MEDIA_UPLOAD_SECRET` | (optional) Shared bearer secret for the upload worker |
 
-When media env vars are set, paste/drop/Add image uploads to object storage and inserts `![alt](url)` Markdown (Obsidian-style). Images in the note also appear in a preview strip under the editor.
+When media env vars are set, pasting or dropping an image uploads it and inserts `![alt](url)` Markdown at the caret.
 
 ```bash
 pnpm dev

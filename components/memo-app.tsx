@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Note } from "@/lib/types";
 import { substituteAsciiArrows } from "@/lib/arrows";
-import {
-  extractMarkdownImages,
-  markdownImage,
-} from "@/lib/media";
+import { markdownImage } from "@/lib/media";
 import {
   measureWrappedRowCounts,
   unitRowCounts,
@@ -41,7 +38,6 @@ const POLL_MS = 1500;
 const DRAFT_BROADCAST_MS = 32;
 /** Phone-width only — keep tablet/desktop browser windows on the desktop layout. */
 const NARROW_QUERY = "(max-width: 480px)";
-const IMAGE_ACCEPT = "image/jpeg,image/png,image/gif,image/webp,image/avif";
 
 async function uploadImageFile(file: File): Promise<string> {
   const response = await fetch("/api/upload", {
@@ -151,8 +147,6 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
   const [caret, setCaret] = useState(0);
   const [gutterRows, setGutterRows] = useState<number[]>([1]);
   const [gutterLineHeightPx, setGutterLineHeightPx] = useState(0);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageError, setImageError] = useState<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipNextSave = useRef(false);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
@@ -300,7 +294,6 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
 
   const lineCount = Math.max(1, body.split("\n").length);
   const currentLine = activeLineNumber(body, caret);
-  const bodyImages = useMemo(() => extractMarkdownImages(body), [body]);
 
   const insertAtCaret = useCallback((snippet: string) => {
     const textarea = bodyRef.current;
@@ -328,8 +321,6 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
     async (files: File[]) => {
       const images = files.filter((file) => file.type.startsWith("image/"));
       if (images.length === 0) return;
-      setImageError(null);
-      setUploadingImage(true);
       try {
         for (const file of images) {
           const url = await uploadImageFile(file);
@@ -337,11 +328,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
           insertAtCaret(markdownImage(url, alt));
         }
       } catch (error) {
-        setImageError(
-          error instanceof Error ? error.message : "Image upload failed",
-        );
-      } finally {
-        setUploadingImage(false);
+        console.error("image upload failed", error);
       }
     },
     [insertAtCaret],
@@ -817,7 +804,7 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
                     onClick={(event) => {
                       setCaret(event.currentTarget.selectionStart);
                     }}
-                    placeholder="Start typing… (paste or drop images)"
+                    placeholder="Start typing…"
                     spellCheck
                     autoFocus
                   />
@@ -853,50 +840,6 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
                     }}
                   />
                 </div>
-              </div>
-              <div className="zed-media">
-                {uploadingImage ? (
-                  <div className="zed-media__status">Uploading image…</div>
-                ) : imageError ? (
-                  <div className="zed-media__error" role="alert">
-                    {imageError}
-                  </div>
-                ) : (
-                  <div className="zed-media__status">
-                    Paste / drop images · inserts Markdown
-                  </div>
-                )}
-                {bodyImages.length > 0 ? (
-                  <div className="zed-media__grid">
-                    {bodyImages.map((image) => (
-                      <a
-                        key={`${image.index}-${image.url}`}
-                        className="zed-media__item"
-                        href={image.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        title={image.alt || image.url}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={image.url} alt={image.alt || ""} />
-                      </a>
-                    ))}
-                  </div>
-                ) : null}
-                <label className="zed-media__pick">
-                  <input
-                    type="file"
-                    accept={IMAGE_ACCEPT}
-                    multiple
-                    hidden
-                    onChange={(event) => {
-                      const files = [...(event.target.files ?? [])];
-                      event.target.value = "";
-                      void uploadAndInsertImages(files);
-                    }}
-                  />
-                  Add image
-                </label>
               </div>
             </div>
           ) : (
