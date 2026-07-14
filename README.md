@@ -24,6 +24,10 @@ Fill in `.env.local`:
 | `DATABASE_URL` | Postgres connection string |
 | `MEMO_PASSWORD` | Login password |
 | `MEMO_SECRET` | HMAC secret for session cookies |
+| `MEDIA_UPLOAD_URL` | (optional) Upload worker URL for pasted/dropped images |
+| `MEDIA_UPLOAD_SECRET` | (optional) Shared bearer secret for the upload worker |
+
+When media env vars are set, paste/drop/Add image uploads to object storage and inserts `![alt](url)` Markdown (Obsidian-style). Images in the note also appear in a preview strip under the editor.
 
 ```bash
 pnpm dev
