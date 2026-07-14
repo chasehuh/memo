@@ -5,14 +5,14 @@ import { faviconBootScript } from "@/lib/themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "memo",
-  description: "Minimal synced notes",
+  title: "agentnote",
+  description: "Minimal notepad built to sit next to the agent tab",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
   appleWebApp: {
     capable: true,
-    title: "memo",
+    title: "agentnote",
     statusBarStyle: "black-translucent",
   },
 };

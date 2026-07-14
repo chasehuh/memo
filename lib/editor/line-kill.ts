@@ -63,7 +63,7 @@ export function zedDeleteToBeginningOfLine(view: EditorView): boolean {
 }
 
 /** High-precedence macOS line-kill bindings (Zed default-macos parity). */
-export function memoLineKillKeymap(): Extension {
+export function agentnoteLineKillKeymap(): Extension {
   return Prec.high(
     keymap.of([
       {

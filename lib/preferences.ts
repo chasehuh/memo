@@ -1,4 +1,4 @@
-export const WRAP_STORAGE_KEY = "memo.wrap";
+export const WRAP_STORAGE_KEY = "agentnote.wrap";
 export const DEFAULT_WRAP = true;
 
 export function isWrapPreference(value: string | null): boolean | null {

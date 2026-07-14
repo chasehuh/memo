@@ -17,7 +17,7 @@ function ThemeSwatch({
 }) {
   const tokens = appearance === "light" ? theme.light : theme.dark;
   return (
-    <span className="memo-settings__swatch" aria-hidden>
+    <span className="agentnote-settings__swatch" aria-hidden>
       <i style={{ background: tokens.editor }} />
       <i style={{ background: tokens.surface }} />
       <i style={{ background: tokens.textAccent }} />
@@ -57,32 +57,32 @@ export function SettingsPanel({
   if (!open) return null;
 
   return (
-    <div className="memo-settings-root" onClick={onClose} role="presentation">
+    <div className="agentnote-settings-root" onClick={onClose} role="presentation">
       <div
-        className="memo-settings"
+        className="agentnote-settings"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="memo-settings-title"
+        aria-labelledby="agentnote-settings-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <header className="memo-settings__header">
-          <h2 id="memo-settings-title">Settings</h2>
+        <header className="agentnote-settings__header">
+          <h2 id="agentnote-settings-title">Settings</h2>
           <button
             type="button"
-            className="memo-settings__ghost"
+            className="agentnote-settings__ghost"
             onClick={onClose}
           >
             Close
           </button>
         </header>
 
-        <div className="memo-settings__body">
-          <section className="memo-settings__section">
-            <h3 className="memo-settings__label">Appearance</h3>
-            <div className="memo-settings__segment" role="group">
+        <div className="agentnote-settings__body">
+          <section className="agentnote-settings__section">
+            <h3 className="agentnote-settings__label">Appearance</h3>
+            <div className="agentnote-settings__segment" role="group">
               <button
                 type="button"
-                className="memo-settings__segment-btn"
+                className="agentnote-settings__segment-btn"
                 data-active={appearance === "light" ? "true" : "false"}
                 onClick={() => onAppearanceChange("light")}
               >
@@ -90,7 +90,7 @@ export function SettingsPanel({
               </button>
               <button
                 type="button"
-                className="memo-settings__segment-btn"
+                className="agentnote-settings__segment-btn"
                 data-active={appearance === "dark" ? "true" : "false"}
                 onClick={() => onAppearanceChange("dark")}
               >
@@ -99,12 +99,12 @@ export function SettingsPanel({
             </div>
           </section>
 
-          <section className="memo-settings__section">
-            <h3 className="memo-settings__label">Editor</h3>
-            <div className="memo-settings__segment" role="group">
+          <section className="agentnote-settings__section">
+            <h3 className="agentnote-settings__label">Editor</h3>
+            <div className="agentnote-settings__segment" role="group">
               <button
                 type="button"
-                className="memo-settings__segment-btn"
+                className="agentnote-settings__segment-btn"
                 data-active={wrap ? "true" : "false"}
                 onClick={() => onWrapChange(true)}
               >
@@ -112,7 +112,7 @@ export function SettingsPanel({
               </button>
               <button
                 type="button"
-                className="memo-settings__segment-btn"
+                className="agentnote-settings__segment-btn"
                 data-active={!wrap ? "true" : "false"}
                 onClick={() => onWrapChange(false)}
               >
@@ -121,23 +121,23 @@ export function SettingsPanel({
             </div>
           </section>
 
-          <section className="memo-settings__section">
-            <h3 className="memo-settings__label">Color system</h3>
-            <div className="memo-settings__themes">
+          <section className="agentnote-settings__section">
+            <h3 className="agentnote-settings__label">Color system</h3>
+            <div className="agentnote-settings__themes">
               {THEMES.map((theme) => (
                 <button
                   key={theme.id}
                   type="button"
-                  className="memo-settings__theme"
+                  className="agentnote-settings__theme"
                   data-active={theme.id === themeId ? "true" : "false"}
                   onClick={() => onThemeChange(theme.id)}
                 >
                   <ThemeSwatch theme={theme} appearance={appearance} />
-                  <span className="memo-settings__theme-copy">
-                    <span className="memo-settings__theme-name">
+                  <span className="agentnote-settings__theme-copy">
+                    <span className="agentnote-settings__theme-name">
                       {theme.name}
                     </span>
-                    <span className="memo-settings__theme-sub">
+                    <span className="agentnote-settings__theme-sub">
                       {theme.editor}
                     </span>
                   </span>

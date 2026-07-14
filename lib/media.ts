@@ -157,7 +157,7 @@ export async function uploadImageBytes(
       "Content-Type": type,
       "X-Upload-Id": uploadId,
       ...(objectKey ? { "X-Upload-Key": objectKey } : {}),
-      "User-Agent": "memo-upload/1.0",
+      "User-Agent": "agentnote-upload/1.0",
     },
     body: bytes,
   });

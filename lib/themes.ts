@@ -418,8 +418,8 @@ export const THEMES: ThemeDefinition[] = [
 
 export const DEFAULT_THEME_ID: ThemeId = "cursor";
 export const DEFAULT_APPEARANCE: Appearance = "dark";
-export const THEME_STORAGE_KEY = "memo.theme";
-export const APPEARANCE_STORAGE_KEY = "memo.appearance";
+export const THEME_STORAGE_KEY = "agentnote.theme";
+export const APPEARANCE_STORAGE_KEY = "agentnote.appearance";
 
 export function isThemeId(value: string): value is ThemeId {
   return THEMES.some((theme) => theme.id === value);
@@ -444,16 +444,16 @@ function updateFavicon(tokens: ThemeTokens) {
 
   const href = faviconHref(tokens.text);
   let link = document.querySelector<HTMLLinkElement>(
-    'link[rel="icon"][data-memo-favicon]',
+    'link[rel="icon"][data-agentnote-favicon]',
   );
   if (!link) {
     document
-      .querySelectorAll('link[rel="icon"]:not([data-memo-favicon])')
+      .querySelectorAll('link[rel="icon"]:not([data-agentnote-favicon])')
       .forEach((node) => node.remove());
     link = document.createElement("link");
     link.rel = "icon";
     link.type = "image/svg+xml";
-    link.dataset.memoFavicon = "true";
+    link.dataset.agentnoteFavicon = "true";
     document.head.appendChild(link);
   }
   link.href = href;
@@ -468,7 +468,7 @@ export function faviconBootScript() {
     ]),
   );
 
-  return `(()=>{try{var C=${JSON.stringify(colors)};var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)})||${JSON.stringify(DEFAULT_THEME_ID)};var a=localStorage.getItem(${JSON.stringify(APPEARANCE_STORAGE_KEY)})||${JSON.stringify(DEFAULT_APPEARANCE)};var c=(C[t]||C[${JSON.stringify(DEFAULT_THEME_ID)}])[a==="light"?"light":"dark"];var h=${JSON.stringify("data:image/svg+xml,")}+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="'+c+'"/></svg>');var l=document.querySelector('link[rel="icon"][data-memo-favicon]');if(!l){document.querySelectorAll('link[rel="icon"]:not([data-memo-favicon])').forEach(function(n){n.remove()});l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';l.setAttribute('data-memo-favicon','true');document.head.appendChild(l)}l.href=h}catch(e){}})();`;
+  return `(()=>{try{var C=${JSON.stringify(colors)};var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)})||${JSON.stringify(DEFAULT_THEME_ID)};var a=localStorage.getItem(${JSON.stringify(APPEARANCE_STORAGE_KEY)})||${JSON.stringify(DEFAULT_APPEARANCE)};var c=(C[t]||C[${JSON.stringify(DEFAULT_THEME_ID)}])[a==="light"?"light":"dark"];var h=${JSON.stringify("data:image/svg+xml,")}+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="'+c+'"/></svg>');var l=document.querySelector('link[rel="icon"][data-agentnote-favicon]');if(!l){document.querySelectorAll('link[rel="icon"]:not([data-agentnote-favicon])').forEach(function(n){n.remove()});l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';l.setAttribute('data-agentnote-favicon','true');document.head.appendChild(l)}l.href=h}catch(e){}})();`;
 }
 
 export function applyTheme(id: ThemeId, appearance: Appearance = "dark") {

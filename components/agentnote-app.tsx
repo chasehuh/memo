@@ -109,7 +109,7 @@ function formatUpdatedAt(value: string) {
   }).format(date);
 }
 
-export function MemoApp({
+export function AgentNoteApp({
   initialNotes,
   userId,
 }: {
@@ -477,10 +477,11 @@ export function MemoApp({
 
   const tabTitle = activeId
     ? previewTitle({ title: deriveTitle(body), body })
-    : "memo";
+    : "agentnote";
 
   useEffect(() => {
-    document.title = tabTitle === "memo" ? "memo" : `${tabTitle} · memo`;
+    document.title =
+      tabTitle === "agentnote" ? "agentnote" : `${tabTitle} · agentnote`;
   }, [tabTitle]);
 
   useEffect(() => {

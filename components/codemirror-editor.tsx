@@ -20,7 +20,7 @@ import {
 import { markdown } from "@codemirror/lang-markdown";
 import { arrowInputHandler, arrowPasteFilter } from "@/lib/editor/arrow-input";
 import { imageWidgets } from "@/lib/editor/image-widgets";
-import { memoLineKillKeymap } from "@/lib/editor/line-kill";
+import { agentnoteLineKillKeymap } from "@/lib/editor/line-kill";
 import { imagePasteDrop } from "@/lib/editor/paste-images";
 
 type CodeMirrorEditorProps = {
@@ -67,13 +67,13 @@ function editorExtensions(
       ...historyKeymap,
       ...defaultKeymap.filter((binding) => {
         const key = "key" in binding ? binding.key : null;
-        // Tab overridden above; mac Mod-Backspace replaced by memoLineKillKeymap
+        // Tab overridden above; mac Mod-Backspace replaced by agentnoteLineKillKeymap
         if (key === "Tab" || key === "Shift-Tab") return false;
         if ("mac" in binding && binding.mac === "Mod-Backspace") return false;
         return true;
       }),
     ]),
-    memoLineKillKeymap(),
+    agentnoteLineKillKeymap(),
     Prec.high(arrowInputHandler()),
     arrowPasteFilter(),
     imageWidgets,

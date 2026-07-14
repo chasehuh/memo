@@ -1,6 +1,6 @@
 import type { Note } from "./types";
 
-export const MEMO_SYNC_CHANNEL = "memo.sync";
+export const AGENTNOTE_SYNC_CHANNEL = "agentnote.sync";
 
 export type SyncMessage =
   | {
@@ -30,8 +30,8 @@ export function createTabId() {
 }
 
 export function syncChannelName(userId?: string | null) {
-  if (userId) return `${MEMO_SYNC_CHANNEL}.${userId}`;
-  return MEMO_SYNC_CHANNEL;
+  if (userId) return `${AGENTNOTE_SYNC_CHANNEL}.${userId}`;
+  return AGENTNOTE_SYNC_CHANNEL;
 }
 
 export function openSyncChannel(

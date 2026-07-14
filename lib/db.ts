@@ -2,9 +2,9 @@ import { Pool, type QueryResultRow } from "pg";
 
 declare global {
   // eslint-disable-next-line no-var
-  var __memoPool: Pool | undefined;
+  var __agentnotePool: Pool | undefined;
   // eslint-disable-next-line no-var
-  var __memoSchemaReady: Promise<void> | undefined;
+  var __agentnoteSchemaReady: Promise<void> | undefined;
 }
 
 function createPool() {
@@ -23,15 +23,15 @@ function createPool() {
 }
 
 export function getPool() {
-  if (!global.__memoPool) {
-    global.__memoPool = createPool();
+  if (!global.__agentnotePool) {
+    global.__agentnotePool = createPool();
   }
-  return global.__memoPool;
+  return global.__agentnotePool;
 }
 
 export async function ensureSchema() {
-  if (!global.__memoSchemaReady) {
-    global.__memoSchemaReady = (async () => {
+  if (!global.__agentnoteSchemaReady) {
+    global.__agentnoteSchemaReady = (async () => {
       const pool = getPool();
       await pool.query(`
         CREATE TABLE IF NOT EXISTS notes (
@@ -70,7 +70,7 @@ export async function ensureSchema() {
       `);
     })();
   }
-  await global.__memoSchemaReady;
+  await global.__agentnoteSchemaReady;
 }
 
 export async function query<T extends QueryResultRow>(
