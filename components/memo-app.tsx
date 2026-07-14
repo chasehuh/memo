@@ -656,9 +656,9 @@ export function MemoApp({ initialNotes }: { initialNotes: Note[] }) {
           className="zed-notes-fab"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open notes"
+          title="Notes"
         >
-          <MenuIcon size={15} />
-          Notes
+          <MenuIcon size={16} />
         </button>
       ) : null}
 
