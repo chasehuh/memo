@@ -772,7 +772,7 @@ button:disabled {
 }
 
 /* Settings modal — self-contained, high specificity */
-.memo-settings-root {
+.agentnote-settings-root {
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -783,7 +783,7 @@ button:disabled {
   background: rgba(0, 0, 0, 0.55);
 }
 
-.memo-settings {
+.agentnote-settings {
   width: min(420px, 100%);
   max-height: min(80vh, 720px);
   display: flex;
@@ -797,7 +797,7 @@ button:disabled {
   font-family: var(--c-ui-font);
 }
 
-.memo-settings__header {
+.agentnote-settings__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -806,7 +806,7 @@ button:disabled {
   border-bottom: 1px solid var(--c-border-variant);
 }
 
-.memo-settings__header h2 {
+.agentnote-settings__header h2 {
   margin: 0;
   font-size: 15px;
   font-weight: 600;
@@ -814,7 +814,7 @@ button:disabled {
   color: var(--c-text);
 }
 
-.memo-settings__ghost {
+.agentnote-settings__ghost {
   height: 28px;
   padding: 0 10px;
   border-radius: 6px;
@@ -824,21 +824,21 @@ button:disabled {
   border: 0;
 }
 
-.memo-settings__ghost:hover {
+.agentnote-settings__ghost:hover {
   background: var(--c-element-hover);
   color: var(--c-text);
 }
 
-.memo-settings__body {
+.agentnote-settings__body {
   padding: 16px 18px 20px;
   overflow: auto;
 }
 
-.memo-settings__section + .memo-settings__section {
+.agentnote-settings__section + .agentnote-settings__section {
   margin-top: 22px;
 }
 
-.memo-settings__label {
+.agentnote-settings__label {
   margin: 0 0 10px;
   color: var(--c-text-muted);
   font-size: 11px;
@@ -847,7 +847,7 @@ button:disabled {
   text-transform: uppercase;
 }
 
-.memo-settings__segment {
+.agentnote-settings__segment {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
@@ -857,7 +857,7 @@ button:disabled {
   border: 1px solid var(--c-border-variant);
 }
 
-.memo-settings__segment-btn {
+.agentnote-settings__segment-btn {
   height: 32px;
   border-radius: 6px;
   border: 0;
@@ -867,22 +867,22 @@ button:disabled {
   font-weight: 500;
 }
 
-.memo-settings__segment-btn:hover {
+.agentnote-settings__segment-btn:hover {
   color: var(--c-text);
 }
 
-.memo-settings__segment-btn[data-active="true"] {
+.agentnote-settings__segment-btn[data-active="true"] {
   background: var(--c-element-selected);
   color: var(--c-text);
 }
 
-.memo-settings__themes {
+.agentnote-settings__themes {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.memo-settings__theme {
+.agentnote-settings__theme {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -895,25 +895,25 @@ button:disabled {
   color: var(--c-text-muted);
 }
 
-.memo-settings__theme:hover {
+.agentnote-settings__theme:hover {
   background: var(--c-element-hover);
   color: var(--c-text);
 }
 
-.memo-settings__theme[data-active="true"] {
+.agentnote-settings__theme[data-active="true"] {
   background: var(--c-element-selected);
   border-color: var(--c-border-focused);
   color: var(--c-text);
 }
 
-.memo-settings__swatch {
+.agentnote-settings__swatch {
   display: grid;
   grid-template-columns: repeat(4, 11px);
   gap: 3px;
   flex-shrink: 0;
 }
 
-.memo-settings__swatch i {
+.agentnote-settings__swatch i {
   display: block;
   width: 11px;
   height: 11px;
@@ -921,21 +921,21 @@ button:disabled {
   border: 1px solid rgba(128, 128, 128, 0.25);
 }
 
-.memo-settings__theme-copy {
+.agentnote-settings__theme-copy {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
 
-.memo-settings__theme-name {
+.agentnote-settings__theme-name {
   display: block;
   font-size: 13px;
   font-weight: 500;
   color: inherit;
 }
 
-.memo-settings__theme-sub {
+.agentnote-settings__theme-sub {
   display: block;
   font-size: 11px;
   color: var(--c-text-placeholder);

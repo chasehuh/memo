@@ -49,7 +49,7 @@ export function ReloadToUpdate() {
       <button
         type="button"
         className="zed-update__btn"
-        title="A newer version of memo is available"
+        title="A newer version of agentnote is available"
         onClick={() => window.location.reload()}
       >
         <DownloadIcon />

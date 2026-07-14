@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     const uploaded = await uploadImageBytes(bytes, type, {
-      keyPrefix: `memo/${authResult.userId}`,
+      keyPrefix: `agentnote/${authResult.userId}`,
     });
     return NextResponse.json(
       { url: uploaded.url, key: uploaded.key },
