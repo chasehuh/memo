@@ -29,7 +29,15 @@ export function createTabId() {
   return `tab-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function openSyncChannel(onMessage: (message: SyncMessage) => void) {
+export function syncChannelName(userId?: string | null) {
+  if (userId) return `${MEMO_SYNC_CHANNEL}.${userId}`;
+  return MEMO_SYNC_CHANNEL;
+}
+
+export function openSyncChannel(
+  onMessage: (message: SyncMessage) => void,
+  userId?: string | null,
+) {
   if (typeof window === "undefined" || typeof BroadcastChannel === "undefined") {
     return {
       post: (_message: SyncMessage) => {},
@@ -37,7 +45,7 @@ export function openSyncChannel(onMessage: (message: SyncMessage) => void) {
     };
   }
 
-  const channel = new BroadcastChannel(MEMO_SYNC_CHANNEL);
+  const channel = new BroadcastChannel(syncChannelName(userId));
   channel.onmessage = (event: MessageEvent<SyncMessage>) => {
     if (!event.data || typeof event.data !== "object") return;
     onMessage(event.data);

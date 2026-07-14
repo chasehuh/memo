@@ -22,60 +22,72 @@ function mapNote(row: NoteRow): Note {
   };
 }
 
-export async function listNotes(): Promise<Note[]> {
+export async function listNotes(userId: string): Promise<Note[]> {
   const result = await query<NoteRow>(
     `SELECT id, title, body, created_at, updated_at
      FROM notes
+     WHERE user_id = $1
      ORDER BY updated_at DESC`,
+    [userId],
   );
   return result.rows.map(mapNote);
 }
 
-export async function getNote(id: string): Promise<Note | null> {
+export async function getNote(
+  userId: string,
+  id: string,
+): Promise<Note | null> {
   const result = await query<NoteRow>(
     `SELECT id, title, body, created_at, updated_at
      FROM notes
-     WHERE id = $1`,
-    [id],
+     WHERE id = $1 AND user_id = $2`,
+    [id, userId],
   );
   const row = result.rows[0];
   return row ? mapNote(row) : null;
 }
 
-export async function createNote(input?: {
-  title?: string;
-  body?: string;
-}): Promise<Note> {
+export async function createNote(
+  userId: string,
+  input?: {
+    title?: string;
+    body?: string;
+  },
+): Promise<Note> {
   const id = randomUUID();
   const title = input?.title ?? "";
   const body = input?.body ?? "";
   const result = await query<NoteRow>(
-    `INSERT INTO notes (id, title, body)
-     VALUES ($1, $2, $3)
+    `INSERT INTO notes (id, user_id, title, body)
+     VALUES ($1, $2, $3, $4)
      RETURNING id, title, body, created_at, updated_at`,
-    [id, title, body],
+    [id, userId, title, body],
   );
   return mapNote(result.rows[0]);
 }
 
 export async function updateNote(
+  userId: string,
   id: string,
   input: { title: string; body: string },
 ): Promise<Note | null> {
   const result = await query<NoteRow>(
     `UPDATE notes
-     SET title = $2,
-         body = $3,
+     SET title = $3,
+         body = $4,
          updated_at = NOW()
-     WHERE id = $1
+     WHERE id = $1 AND user_id = $2
      RETURNING id, title, body, created_at, updated_at`,
-    [id, input.title, input.body],
+    [id, userId, input.title, input.body],
   );
   const row = result.rows[0];
   return row ? mapNote(row) : null;
 }
 
-export async function deleteNote(id: string): Promise<boolean> {
-  const result = await query(`DELETE FROM notes WHERE id = $1`, [id]);
+export async function deleteNote(userId: string, id: string): Promise<boolean> {
+  const result = await query(
+    `DELETE FROM notes WHERE id = $1 AND user_id = $2`,
+    [id, userId],
+  );
   return (result.rowCount ?? 0) > 0;
 }

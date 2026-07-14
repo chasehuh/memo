@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { deleteNote, getNote, updateNote } from "@/lib/notes";
+import { requireUserId } from "@/lib/require-user";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: Params) {
+  const authResult = await requireUserId();
+  if ("error" in authResult) return authResult.error;
+
   const { id } = await params;
   try {
-    const note = await getNote(id);
+    const note = await getNote(authResult.userId, id);
     if (!note) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -18,13 +22,16 @@ export async function GET(_request: Request, { params }: Params) {
 }
 
 export async function PUT(request: Request, { params }: Params) {
+  const authResult = await requireUserId();
+  if ("error" in authResult) return authResult.error;
+
   const { id } = await params;
   try {
     const payload = (await request.json()) as {
       title?: string;
       body?: string;
     };
-    const note = await updateNote(id, {
+    const note = await updateNote(authResult.userId, id, {
       title: payload.title ?? "",
       body: payload.body ?? "",
     });
@@ -39,9 +46,12 @@ export async function PUT(request: Request, { params }: Params) {
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
+  const authResult = await requireUserId();
+  if ("error" in authResult) return authResult.error;
+
   const { id } = await params;
   try {
-    const ok = await deleteNote(id);
+    const ok = await deleteNote(authResult.userId, id);
     if (!ok) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }

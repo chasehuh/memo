@@ -105,9 +105,27 @@ export function withoutMarkdownImageWidth(
 }
 
 
+function extensionForType(type: string) {
+  switch (type) {
+    case "image/jpeg":
+      return "jpg";
+    case "image/png":
+      return "png";
+    case "image/gif":
+      return "gif";
+    case "image/webp":
+      return "webp";
+    case "image/avif":
+      return "avif";
+    default:
+      return "bin";
+  }
+}
+
 export async function uploadImageBytes(
   bytes: ArrayBuffer,
   contentType: string,
+  options?: { keyPrefix?: string },
 ): Promise<{ url: string; key?: string }> {
   const endpoint = process.env.MEDIA_UPLOAD_URL?.trim();
   const secret = process.env.MEDIA_UPLOAD_SECRET?.trim();
@@ -126,12 +144,19 @@ export async function uploadImageBytes(
     throw new Error("Image too large");
   }
 
+  const uploadId = randomUUID();
+  const keyPrefix = options?.keyPrefix?.replace(/\/+$/, "");
+  const objectKey = keyPrefix
+    ? `${keyPrefix}/${uploadId}.${extensionForType(type)}`
+    : undefined;
+
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${secret}`,
       "Content-Type": type,
-      "X-Upload-Id": randomUUID(),
+      "X-Upload-Id": uploadId,
+      ...(objectKey ? { "X-Upload-Key": objectKey } : {}),
       "User-Agent": "memo-upload/1.0",
     },
     body: bytes,

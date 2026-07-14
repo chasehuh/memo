@@ -156,9 +156,9 @@ export function SettingsPanel({
               onClick={onLock}
             >
               <span className="memo-settings__theme-copy">
-                <span className="memo-settings__theme-name">Lock memo</span>
+                <span className="memo-settings__theme-name">Sign out</span>
                 <span className="memo-settings__theme-sub">
-                  Require password again
+                  Sign out of GitHub session
                 </span>
               </span>
             </button>
