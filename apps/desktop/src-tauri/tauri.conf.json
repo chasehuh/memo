@@ -20,12 +20,14 @@
         "resizable": true,
         "fullscreen": false,
         "decorations": true,
+        "transparent": false,
         "hiddenTitle": true,
         "titleBarStyle": "Overlay",
         "trafficLightPosition": {
-          "x": 14.0,
-          "y": 10.0
+          "x": 16.0,
+          "y": 12.0
         },
+        "backgroundColor": "#141414",
         "userAgent": "agentnote-desktop"
       }
     ],
