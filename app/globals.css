@@ -184,6 +184,38 @@ button:disabled {
   user-select: none;
 }
 
+/* macOS Overlay titlebar — opaque chrome + traffic-light inset */
+html[data-desktop="tauri"],
+html[data-desktop="tauri"] body {
+  background: var(--c-background);
+}
+
+html[data-desktop="tauri"] .zed-desktop-chrome {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  height: 38px;
+  background: var(--c-background);
+  border-bottom: 1px solid var(--c-border-variant);
+  pointer-events: none;
+}
+
+/* Main app already has `.zed-titlebar` — hide the stub chrome strip */
+html[data-desktop="tauri"] body:has(.zed-shell) .zed-desktop-chrome {
+  display: none;
+}
+
+html[data-desktop="tauri"] .zed-titlebar {
+  height: 38px;
+  padding-left: 78px;
+}
+
+html[data-desktop="tauri"] .zed-login {
+  padding-top: 38px;
+}
+
 .zed-titlebar__title {
   min-width: 0;
   max-width: min(42vw, 360px);

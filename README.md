@@ -2,7 +2,7 @@
 
 Minimal notepad built to sit next to the agent tab.
 
-Live: [memo.chasehuh.com](https://memo.chasehuh.com)
+Live: [www.agentnote.dev](https://www.agentnote.dev)
 
 ## Stack
 
@@ -11,6 +11,7 @@ Live: [memo.chasehuh.com](https://memo.chasehuh.com)
 - CodeMirror 6 note editor (Zed-like chrome, soft wrap, Tab→spaces; ⌘⌫ deletes to hard line start, ⇧⌘K deletes the line)
 - Postgres (`pg`) — notes scoped by Clerk `user_id`
 - Vercel
+- Optional macOS desktop shell (Tauri 2) that loads the web app
 
 ## Setup
 
@@ -55,10 +56,10 @@ When media env vars are set, pasting or dropping an image uploads it (Clerk-auth
 Development can use Clerk’s shared GitHub credentials. Production needs a GitHub OAuth App:
 
 1. Create an OAuth App at [GitHub Developer Settings](https://github.com/settings/developers) (under `chasehuh` or the operator account).
-2. Set **Homepage URL** to `https://memo.chasehuh.com`.
-3. Set **Authorization callback URL** to the value shown in the Clerk Dashboard for the **agentnote** production instance → Social connections → GitHub (typically `https://<clerk-frontend-api>/v1/oauth_callback`).
+2. Set **Homepage URL** to `https://www.agentnote.dev`.
+3. Set **Authorization callback URL** to the value shown in the Clerk Dashboard for the **agentnote** production instance → Social connections → GitHub (typically `https://clerk.agentnote.dev/v1/oauth_callback`).
 4. Paste Client ID + Client Secret into Clerk production → GitHub connection.
-5. Add production domain `memo.chasehuh.com` in Clerk, deploy with production Clerk keys on Vercel.
+5. Keep production domain `agentnote.dev` / `www.agentnote.dev` in Clerk, deploy with production Clerk keys on Vercel.
 
 ### Existing notes without `user_id`
 
@@ -71,9 +72,43 @@ ALTER TABLE notes ALTER COLUMN user_id SET NOT NULL;
 
 (`ensureSchema` will set `NOT NULL` automatically once no nulls remain.)
 
+## Desktop (macOS)
+
+Thin [Tauri 2](https://v2.tauri.app/) shell under `apps/desktop`. It loads the **same** web UI — no second frontend, no local notes DB.
+
+| Mode | Webview URL |
+| --- | --- |
+| `pnpm desktop:dev` | `http://localhost:3000` |
+| `pnpm desktop:build` | `https://www.agentnote.dev` |
+
+Prerequisites: Rust (`rustup`), Xcode Command Line Tools, and (for `desktop:dev`) the Next app running on port 3000.
+
+```bash
+# Terminal A
+pnpm dev
+
+# Terminal B
+pnpm desktop:dev
+```
+
+Production `.app`:
+
+```bash
+pnpm desktop:build
+# → apps/desktop/src-tauri/target/release/bundle/macos/agentnote.app
+```
+
+(DMG packaging is optional; enable `"targets": ["app", "dmg"]` in `tauri.conf.json` if you want it.)
+
+Window chrome uses macOS Overlay titlebar + traffic lights; the in-page Zed-like titlebar gets a left padding when `data-desktop="tauri"` is set. Existing shortcuts (`⌘B`, `⌘N`, `⌘\`) stay in the web app.
+
+**Clerk / OAuth note:** GitHub OAuth inside WKWebView can fail (popups, cookie partitions, redirects). If sign-in breaks in the desktop shell, use the browser app or follow up with system-browser OAuth. The shell does not embed Clerk secrets or `DATABASE_URL`.
+
+Packaging layout is loosely inspired by [fastrepl/anarlog](https://github.com/fastrepl/anarlog) `apps/desktop` — not its local-first stack.
+
 ## Deploy
 
-Point the project at Vercel, set the Clerk + `DATABASE_URL` env vars for Production, attach `memo.chasehuh.com`, and complete the production GitHub OAuth App steps above.
+Point the project at Vercel, set the Clerk + `DATABASE_URL` env vars for Production, attach `www.agentnote.dev`, and complete the production GitHub OAuth App steps above.
 
 ## License
 
