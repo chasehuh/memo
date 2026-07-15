@@ -184,6 +184,15 @@ button:disabled {
   user-select: none;
 }
 
+/* macOS traffic lights sit in the Overlay titlebar when running in Tauri */
+html[data-desktop="tauri"] .zed-titlebar {
+  padding-left: 78px;
+}
+
+html[data-desktop="tauri"] .zed-login {
+  padding-top: 36px;
+}
+
 .zed-titlebar__title {
   min-width: 0;
   max-width: min(42vw, 360px);

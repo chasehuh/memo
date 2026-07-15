@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { DesktopShell } from "@/components/desktop-shell";
 import { ThemeBoot } from "@/components/theme-boot";
 import { faviconBootScript } from "@/lib/themes";
 import "./globals.css";
@@ -39,6 +40,7 @@ export default function RootLayout({
       </head>
       <body className="h-full">
         <ClerkProvider>
+          <DesktopShell />
           <ThemeBoot />
           {children}
         </ClerkProvider>
