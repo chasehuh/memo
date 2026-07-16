@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
+import { isValidNoteId } from "@/lib/note-id";
 import { deleteNote, getNote, updateNote } from "@/lib/notes";
 import { requireUserId } from "@/lib/require-user";
 
 type Params = { params: Promise<{ id: string }> };
+
+function invalidIdResponse() {
+  return NextResponse.json({ error: "Not found" }, { status: 404 });
+}
 
 export async function GET(_request: Request, { params }: Params) {
   const authResult = await requireUserId();
   if ("error" in authResult) return authResult.error;
 
   const { id } = await params;
+  if (!isValidNoteId(id)) return invalidIdResponse();
   try {
     const note = await getNote(authResult.userId, id);
     if (!note) {
@@ -26,6 +32,7 @@ export async function PUT(request: Request, { params }: Params) {
   if ("error" in authResult) return authResult.error;
 
   const { id } = await params;
+  if (!isValidNoteId(id)) return invalidIdResponse();
   try {
     const payload = (await request.json()) as {
       title?: string;
@@ -50,6 +57,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   if ("error" in authResult) return authResult.error;
 
   const { id } = await params;
+  if (!isValidNoteId(id)) return invalidIdResponse();
   try {
     const ok = await deleteNote(authResult.userId, id);
     if (!ok) {

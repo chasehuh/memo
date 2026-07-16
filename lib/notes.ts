@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto";
 import { query } from "./db";
+import { createNoteId } from "./note-id";
 import type { Note } from "./types";
 
 export type { Note };
@@ -54,16 +54,31 @@ export async function createNote(
     body?: string;
   },
 ): Promise<Note> {
-  const id = randomUUID();
   const title = input?.title ?? "";
   const body = input?.body ?? "";
-  const result = await query<NoteRow>(
-    `INSERT INTO notes (id, user_id, title, body)
-     VALUES ($1, $2, $3, $4)
-     RETURNING id, title, body, created_at, updated_at`,
-    [id, userId, title, body],
-  );
-  return mapNote(result.rows[0]);
+
+  // Rare primary-key collision: retry with a fresh short id.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const id = createNoteId();
+    try {
+      const result = await query<NoteRow>(
+        `INSERT INTO notes (id, user_id, title, body)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, title, body, created_at, updated_at`,
+        [id, userId, title, body],
+      );
+      return mapNote(result.rows[0]);
+    } catch (error) {
+      const code =
+        error && typeof error === "object" && "code" in error
+          ? String((error as { code: unknown }).code)
+          : "";
+      if (code === "23505" && attempt < 4) continue;
+      throw error;
+    }
+  }
+
+  throw new Error("Failed to allocate note id");
 }
 
 export async function updateNote(
