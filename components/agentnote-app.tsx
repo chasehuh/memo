@@ -109,20 +109,46 @@ function formatUpdatedAt(value: string) {
   }).format(date);
 }
 
+function resolveInitialNote(
+  notes: Note[],
+  initialSelectedId?: string,
+): Note | null {
+  if (initialSelectedId) {
+    const match = notes.find((note) => note.id === initialSelectedId);
+    if (match) return match;
+  }
+  return notes[0] ?? null;
+}
+
+function notePath(id: string | null) {
+  return id ? `/n/${id}` : "/";
+}
+
+/** Soft URL sync — avoids App Router remount when switching notes. */
+function replaceNoteUrl(id: string | null) {
+  const next = notePath(id);
+  if (window.location.pathname === next) return;
+  window.history.replaceState(window.history.state, "", next);
+}
+
 export function AgentNoteApp({
   initialNotes,
   userId,
+  initialSelectedId,
 }: {
   initialNotes: Note[];
   userId: string;
+  /** When set (deep link `/n/{id}`), open that note; otherwise first note / empty. */
+  initialSelectedId?: string;
 }) {
   const [notes, setNotes] = useState(() => sortNotesByRecent(initialNotes));
-  const [activeId, setActiveId] = useState<string | null>(
-    initialNotes[0]?.id ?? null,
-  );
-  const [body, setBody] = useState(
-    () => substituteAsciiArrows(initialNotes[0]?.body ?? "").text,
-  );
+  const [activeId, setActiveId] = useState<string | null>(() => {
+    return resolveInitialNote(initialNotes, initialSelectedId)?.id ?? null;
+  });
+  const [body, setBody] = useState(() => {
+    const initial = resolveInitialNote(initialNotes, initialSelectedId);
+    return substituteAsciiArrows(initial?.body ?? "").text;
+  });
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -264,6 +290,18 @@ export function AgentNoteApp({
     [notes, activeId],
   );
 
+  const clearActiveNote = useCallback(() => {
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+    }
+    skipNextSave.current = true;
+    setActiveId(null);
+    setBody("");
+    setSaveState("saved");
+    replaceNoteUrl(null);
+  }, []);
+
   const selectNote = useCallback((note: Note) => {
     if (saveTimer.current) {
       clearTimeout(saveTimer.current);
@@ -275,6 +313,7 @@ export function AgentNoteApp({
     setActiveId(note.id);
     setBody(nextBody);
     setSaveState(nextBody === note.body ? "saved" : "dirty");
+    replaceNoteUrl(note.id);
     if (isNarrowViewport()) setSidebarOpen(false);
   }, []);
 
@@ -368,17 +407,16 @@ export function AgentNoteApp({
             setActiveId(fallback.id);
             setBody(nextBody);
             setSaveState(nextBody === fallback.body ? "saved" : "dirty");
+            replaceNoteUrl(fallback.id);
           } else {
-            setActiveId(null);
-            setBody("");
-            setSaveState("saved");
+            clearActiveNote();
           }
         }
       }
     } catch {
       // Keep local state if the network blips.
     }
-  }, [applyRemoteNote]);
+  }, [applyRemoteNote, clearActiveNote]);
 
   useEffect(() => {
     const channel = openSyncChannel((message) => {
@@ -402,9 +440,11 @@ export function AgentNoteApp({
             if (fallback) {
               setActiveId(fallback.id);
               setBody(substituteAsciiArrows(fallback.body).text);
+              replaceNoteUrl(fallback.id);
             } else {
               setActiveId(null);
               setBody("");
+              replaceNoteUrl(null);
             }
             setSaveState("saved");
           }
@@ -466,9 +506,7 @@ export function AgentNoteApp({
         if (fallback) {
           selectNote(fallback);
         } else {
-          setActiveId(null);
-          setBody("");
-          setSaveState("saved");
+          clearActiveNote();
         }
       }
       return next;
