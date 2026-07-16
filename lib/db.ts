@@ -35,13 +35,29 @@ export async function ensureSchema() {
       const pool = getPool();
       await pool.query(`
         CREATE TABLE IF NOT EXISTS notes (
-          id UUID PRIMARY KEY,
+          id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL,
           title TEXT NOT NULL DEFAULT '',
           body TEXT NOT NULL DEFAULT '',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+      `);
+      // Legacy installs used UUID; widen so short nanoid ids can be stored.
+      await pool.query(`
+        DO $$
+        BEGIN
+          IF EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'notes'
+              AND column_name = 'id'
+              AND data_type = 'uuid'
+          ) THEN
+            ALTER TABLE notes ALTER COLUMN id TYPE TEXT USING id::text;
+          END IF;
+        END $$;
       `);
       // Existing deployments created notes without user_id — add nullable first.
       await pool.query(`

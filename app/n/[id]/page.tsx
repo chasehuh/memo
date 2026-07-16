@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { AgentNoteApp } from "@/components/agentnote-app";
+import { isValidNoteId } from "@/lib/note-id";
 import { listNotes } from "@/lib/notes";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,11 @@ export default async function NotePage({
   }
 
   const { id } = await params;
+  // Invalid format → soft-missing (same as unknown id).
+  if (!isValidNoteId(id)) {
+    redirect("/");
+  }
+
   const notes = await listNotes(userId);
   const owned = notes.some((note) => note.id === id);
 

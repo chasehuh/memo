@@ -5,6 +5,7 @@ import { faviconBootScript } from "@/lib/themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Plain default (no title template) so client document.title updates are not overridden.
   title: "agentnote",
   description: "Minimal notepad built to sit next to the agent tab",
   icons: {

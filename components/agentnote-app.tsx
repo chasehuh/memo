@@ -517,9 +517,9 @@ export function AgentNoteApp({
     ? previewTitle({ title: deriveTitle(body), body })
     : "agentnote";
 
+  // Browser tab: page title only (Notion-style). Shell stays "agentnote".
   useEffect(() => {
-    document.title =
-      tabTitle === "agentnote" ? "agentnote" : `${tabTitle} · agentnote`;
+    document.title = tabTitle;
   }, [tabTitle]);
 
   useEffect(() => {
