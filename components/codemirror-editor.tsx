@@ -117,7 +117,8 @@ function editorExtensions(
         lineHeight: "var(--c-buffer-line-height)",
       },
       ".cm-content": {
-        caretColor: "var(--c-text-accent)",
+        // Neutral caret (Cursor-like) — not accent blue.
+        caretColor: "var(--c-editor-fg)",
         color: "var(--c-editor-fg)",
         // Top inset: CM mirrors this into gutter element marginTop via
         // documentPadding — do not also pad .cm-gutters.
@@ -163,7 +164,7 @@ function editorExtensions(
         backgroundColor: "var(--c-selection) !important",
       },
       ".cm-cursor, .cm-dropCursor": {
-        borderLeftColor: "var(--c-text-accent)",
+        borderLeftColor: "var(--c-editor-fg)",
       },
       ".cm-placeholder": {
         color: "var(--c-text-placeholder)",
