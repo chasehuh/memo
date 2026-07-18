@@ -28,6 +28,11 @@ import {
   LIST_INDENT_UNIT,
 } from "@/lib/editor/list-indent";
 import { imagePasteDrop } from "@/lib/editor/paste-images";
+import {
+  agentnoteStrikethroughHighlight,
+  agentnoteStrikethroughKeymap,
+  agentnoteStrikethroughMarkdown,
+} from "@/lib/editor/strikethrough";
 import { indentedLineWrapping } from "@/lib/editor/wrap-indent";
 
 type CodeMirrorEditorProps = {
@@ -65,7 +70,8 @@ function editorExtensions(
       ? []
       : [highlightActiveLine(), highlightActiveLineGutter(), history()]),
     drawSelection(),
-    markdown(),
+    markdown({ extensions: agentnoteStrikethroughMarkdown }),
+    agentnoteStrikethroughHighlight(),
     placeholder(placeholderText),
     indentUnit.of(LIST_INDENT_UNIT),
     EditorState.readOnly.of(readOnly),
@@ -95,6 +101,7 @@ function editorExtensions(
             }),
           ]),
           agentnoteLineKillKeymap(),
+          agentnoteStrikethroughKeymap(),
           Prec.high(arrowInputHandler()),
           arrowPasteFilter(),
           imagePasteDrop(),

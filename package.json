@@ -16,6 +16,7 @@
     "@codemirror/state": "^6.7.1",
     "@codemirror/view": "^6.43.6",
     "@lezer/highlight": "^1.2.3",
+    "@lezer/markdown": "^1.7.1",
     "nanoid": "^5.1.16",
     "next": "16.2.10",
     "pg": "^8.22.0",
